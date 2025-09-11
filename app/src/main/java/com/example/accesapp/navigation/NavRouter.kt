@@ -1,40 +1,43 @@
 package com.example.accesapp.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.accesapp.views.Home
-import com.example.accesapp.views.Login
-import com.example.accesapp.views.Register
-import com.example.accesapp.views.Recover
-
+import androidx.navigation.compose.rememberNavController
+import com.example.accesapp.viewModel.UsuarioViewModel
+import com.example.accesapp.ui.view.Home
+import com.example.accesapp.ui.view.Login
+import com.example.accesapp.ui.view.Register
+import com.example.accesapp.ui.view.Recover
+import com.example.accesapp.ui.view.Speech
+import com.example.accesapp.ui.view.Config
+import com.example.accesapp.viewModel.ThemeViewModel    
 
 sealed class NavRouter(val route: String) {
+
+    object Home : NavRouter("home")
     object Login : NavRouter("login")
     object Register : NavRouter("register")
     object Recover : NavRouter("recover")
-    object Home : NavRouter("menu/{nombreUsuario}") {
-        fun createRoute(nombreUsuario: String) = "menu/$nombreUsuario"
-    }
+    object Speech : NavRouter("speech")
+    object Config : NavRouter("config")
 }
 
 @Composable
-fun AppNav() {
+fun AppNav(themeViewModel: ThemeViewModel) {
     val navController = rememberNavController()
+    val usuarioViewModel: UsuarioViewModel = viewModel()
 
-    NavHost(navController, startDestination = NavRouter.Login.route) {
-        composable(
-            route = NavRouter.Home.route,
-            arguments = listOf(navArgument("nombreUsuario") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val nombreUsuario = backStackEntry.arguments?.getString("nombreUsuario") ?: ""
-            Home(navController = navController, nombreUsuario = nombreUsuario)
-        }
-        composable(NavRouter.Login.route) { Login(navController) }
-        composable(NavRouter.Recover.route) { Recover(navController) }
-        composable(NavRouter.Register.route) { Register(navController) }
+    NavHost(navController = navController, startDestination = NavRouter.Home.route) {
+        composable(NavRouter.Home.route) { Home(navController, themeViewModel) }
+        composable(NavRouter.Login.route) { Login(navController, themeViewModel, usuarioViewModel) }
+        composable(NavRouter.Recover.route) { Recover(navController, themeViewModel, usuarioViewModel) }
+        composable(NavRouter.Register.route) { Register(navController, themeViewModel, usuarioViewModel) }
+        composable(NavRouter.Config.route) { Config(navController, themeViewModel) }
+        composable(NavRouter.Speech.route) { Speech(navController, themeViewModel, usuarioViewModel) }
     }
 }

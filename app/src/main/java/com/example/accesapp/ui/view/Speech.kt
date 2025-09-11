@@ -1,8 +1,7 @@
-package com.example.accesapp.views
+package com.example.accesapp.ui.view
 
 import android.content.Intent
 import android.speech.tts.TextToSpeech
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -19,11 +18,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.accesapp.navigation.NavRouter
+import com.example.accesapp.viewModel.ThemeViewModel
+import com.example.accesapp.viewModel.UsuarioViewModel
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Home(navController: NavController, nombreUsuario: String) {
+fun Speech(navController: NavController, themeViewModel: ThemeViewModel, usuarioViewModel: UsuarioViewModel) {
     val context = LocalContext.current
     var tts: TextToSpeech? by remember { mutableStateOf(null) }
     var texto by remember { mutableStateOf("") }
@@ -44,7 +45,7 @@ fun Home(navController: NavController, nombreUsuario: String) {
         tts = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 tts?.language = Locale("es", "ES")
-                tts?.speak("Bienvenido, $nombreUsuario", TextToSpeech.QUEUE_FLUSH, null, null)
+//                tts?.speak("Bienvenido, $nombreUsuario", TextToSpeech.QUEUE_FLUSH, null, null)
             }
         }
     }
@@ -76,32 +77,6 @@ fun Home(navController: NavController, nombreUsuario: String) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.Top
         ) {
-            // Bienvenida + cerrar sesión
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    "¡Hola, $nombreUsuario!",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 22.sp
-                )
-                TextButton(
-                    onClick = {
-                        tts?.speak("Cerrando sesión", TextToSpeech.QUEUE_FLUSH, null, null)
-                        navController.navigate(NavRouter.Login.route) {
-                            popUpTo(NavRouter.Home.route) { inclusive = true }
-                        }
-                    }
-                ) {
-                    Text("Cerrar sesión", color = Color(0xFF474652), fontSize = 16.sp)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
             // Campo de texto accesible
             OutlinedTextField(
                 value = texto,
@@ -184,6 +159,8 @@ fun Home(navController: NavController, nombreUsuario: String) {
 
             // Frases rápidas
             Text("Frases rápidas", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+
+            Spacer(modifier = Modifier.height(32.dp))
 
             Column(
                 modifier = Modifier.fillMaxWidth(),

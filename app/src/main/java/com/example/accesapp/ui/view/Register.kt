@@ -1,4 +1,4 @@
-package com.example.accesapp.views
+package com.example.accesapp.ui.view
 
 import android.speech.tts.TextToSpeech
 import android.widget.Toast
@@ -17,16 +17,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.accesapp.model.UsuarioRepositorio
-import com.example.accesapp.model.Usuarios
 import com.example.accesapp.navigation.NavRouter
+import com.example.accesapp.viewModel.ThemeViewModel
+import com.example.accesapp.viewModel.UsuarioViewModel
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Register(navController: NavController) {
+fun Register(navController: NavController, themeViewModel: ThemeViewModel, usuarioViewModel: UsuarioViewModel) {
     val context = LocalContext.current
 
+    var rutError by remember { mutableStateOf(false) }
+    var rut by remember { mutableStateOf("") }
     var nombreUsuario by remember { mutableStateOf("") }
     var nombre by remember { mutableStateOf("") }
     var apellidoP by remember { mutableStateOf("") }
@@ -53,26 +55,68 @@ fun Register(navController: NavController) {
             TopAppBar(
                 title = {
                     Text(
-                        "Registro de usuario",
-                        color = Color(0xFFCECECE),
+                        "Registro",
+                        color = MaterialTheme.colorScheme.onPrimary,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.fillMaxWidth()
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF272635))
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
             )
         },
-        containerColor = Color(0xFFE8E9F3)
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextButton(
+                    onClick = {
+                        navController.navigate(NavRouter.Login.route) {
+                            popUpTo(NavRouter.Register.route) { inclusive = true }
+                        }
+                    }
+                ) {
+                    Text("Volver",
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 20.sp
+                    )
+                }
+            }
+            OutlinedTextField(
+                value = rut,
+                onValueChange = {
+                    rut = it
+                    rutError = !usuarioViewModel.esRutValido(it) // true si es inválido
+                },
+                label = { Text("Rut usuario (xxxxxxxx-x)") },
+                isError = rutError,
+                modifier = Modifier.fillMaxWidth(),
+
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color(0xFFCECECE),
+                    unfocusedContainerColor = Color(0xFFCECECE),
+                    focusedTextColor = Color(0xFF474652),
+                    unfocusedTextColor = Color(0xFF474652),
+                    focusedIndicatorColor = Color(0xFF272635),
+                    unfocusedIndicatorColor = Color(0xFF272635),
+                    focusedLabelColor = Color(0xFF272635),
+                    unfocusedLabelColor = Color(0xFF474652),
+                )
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             val campos = listOf(
                 "Nombre de usuario" to nombreUsuario,
                 "Nombre" to nombre,
@@ -167,7 +211,8 @@ fun Register(navController: NavController) {
             // Botón de registro
             Button(
                 onClick = {
-                    if (nombreUsuario.isNotBlank() &&
+                    if (rut.isNotBlank() &&
+                        nombreUsuario.isNotBlank() &&
                         nombre.isNotBlank() &&
                         apellidoP.isNotBlank() &&
                         apellidoM.isNotBlank() &&
@@ -176,8 +221,8 @@ fun Register(navController: NavController) {
                         genero.isNotBlank() &&
                         aceptoTerminos
                     ) {
-                        UsuarioRepositorio.agregarUsuario(
-                            Usuarios(nombreUsuario, nombre, apellidoP, apellidoM, correo, contrasena, genero)
+                        usuarioViewModel.agregarUsuario(
+                            rut, nombreUsuario, nombre, apellidoP, apellidoM, correo, contrasena, genero
                         )
                         val mensaje = "Usuario registrado con éxito"
                         tts?.speak(mensaje, TextToSpeech.QUEUE_FLUSH, null, null)
@@ -199,12 +244,6 @@ fun Register(navController: NavController) {
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text("Registrarse", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            TextButton(onClick = { navController.popBackStack() }) {
-                Text("Volver al login", color = Color(0xFF474652), fontSize = 16.sp)
             }
         }
     }

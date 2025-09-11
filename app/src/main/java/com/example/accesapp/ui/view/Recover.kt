@@ -1,6 +1,7 @@
-package com.example.accesapp.views
+package com.example.accesapp.ui.view
 
 import android.speech.tts.TextToSpeech
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -14,16 +15,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.accesapp.model.UsuarioRepositorio
 import com.example.accesapp.navigation.NavRouter
+import com.example.accesapp.viewModel.ThemeViewModel
+import com.example.accesapp.viewModel.UsuarioViewModel
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Recover(navController: NavController) {
+fun Recover(navController: NavController, themeViewModel: ThemeViewModel, usuarioViewModel: UsuarioViewModel) {
     val context = LocalContext.current
     var correo by remember { mutableStateOf("") }
-    var resultado by remember { mutableStateOf<String?>(null) }
+    var mensaje by remember { mutableStateOf<String?>(null) }
 
     var tts: TextToSpeech? by remember { mutableStateOf(null) }
 
@@ -41,34 +43,44 @@ fun Recover(navController: NavController) {
             TopAppBar(
                 title = {
                     Text(
-                        "Recuperar contraseña",
-                        color = Color(0xFFCECECE),
+                        "Recuperar",
+                        color = MaterialTheme.colorScheme.onPrimary,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.fillMaxWidth()
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF272635))
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
             )
         },
-        containerColor = Color(0xFFE8E9F3)
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                "Ingresa tu correo para recuperar tu contraseña",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF474652),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextButton(
+                    onClick = {
+                        navController.navigate(NavRouter.Login.route) {
+                            popUpTo(NavRouter.Recover.route) { inclusive = true }
+                        }
+                    }
+                ) {
+                    Text("Volver",
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 20.sp
+                    )
+                }
+            }
 
             OutlinedTextField(
                 value = correo,
@@ -92,16 +104,16 @@ fun Recover(navController: NavController) {
 
             Button(
                 onClick = {
-                    val usuario = UsuarioRepositorio.obtenerUsuarios()
+                    val usuario = usuarioViewModel.obtenerUsuarios()
                         .find { it.correo.equals(correo.trim(), ignoreCase = true) }
 
-                    resultado = if (usuario != null) {
+                    mensaje = if (usuario != null) {
                         "Tu contraseña es: ${usuario.contrasena}"
                     } else {
                         "El correo ingresado no está registrado."
                     }
-
-                    tts?.speak(resultado!!, TextToSpeech.QUEUE_FLUSH, null, null)
+                    Toast.makeText(context, mensaje, Toast.LENGTH_SHORT).show()
+                    tts?.speak(mensaje!!, TextToSpeech.QUEUE_FLUSH, null, null)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -113,23 +125,6 @@ fun Recover(navController: NavController) {
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text("Recuperar contraseña", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            TextButton(onClick = { navController.popBackStack() }) {
-                Text("Volver al login", color = Color(0xFF474652), fontSize = 16.sp)
-            }
-
-            resultado?.let {
-                Spacer(modifier = Modifier.height(20.dp))
-                Text(
-                    it,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = if (it.startsWith("✅")) Color(0xFF388E3C) else Color(0xFFD32F2F),
-                    textAlign = TextAlign.Center,
-                    fontSize = 16.sp
-                )
             }
         }
     }
