@@ -8,5 +8,6 @@ data class Usuario (
     val apellidoM: String,
     val correo: String,
     val contrasena: String,
-    val genero: String
+    val genero: String,
+    val frases: MutableList<Frase> = mutableListOf()
 )

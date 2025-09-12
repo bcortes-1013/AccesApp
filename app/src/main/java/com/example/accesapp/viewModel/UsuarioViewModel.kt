@@ -4,6 +4,7 @@ package com.example.accesapp.viewModel
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
+import com.example.accesapp.model.Frase
 import com.example.accesapp.model.Usuario
 
 class UsuarioViewModel: ViewModel() {
@@ -129,7 +130,8 @@ class UsuarioViewModel: ViewModel() {
             apellidoM,
             correo,
             contrasena,
-            genero
+            genero,
+            frases = frasesPorDefecto().toMutableList()
         )
         _usuarios.add(nuevo)
     }
@@ -167,5 +169,15 @@ class UsuarioViewModel: ViewModel() {
             10 -> "K"
             else -> dv.toString()
         }
+    }
+
+    private fun frasesPorDefecto(): List<Frase> {
+        return listOf(
+            Frase(1, "¿Me puedes ayudar, por favor?"),
+            Frase(2, "¿Dónde está la parada de bus?"),
+            Frase(3, "Gracias por tu ayuda"),
+            Frase(4, "Necesito cruzar la calle"),
+            Frase(5, "¿Me puedes indicar qué número de bus viene?")
+        )
     }
 }

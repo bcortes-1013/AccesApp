@@ -5,6 +5,7 @@ import android.speech.tts.TextToSpeech
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -55,8 +57,8 @@ fun Speech(navController: NavController, themeViewModel: ThemeViewModel, usuario
             TopAppBar(
                 title = {
                     Text(
-                        "AccesAPP",
-                        color = Color(0xFFCECECE),
+                        "Diccionario",
+                        color = MaterialTheme.colorScheme.onPrimary,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
@@ -64,11 +66,11 @@ fun Speech(navController: NavController, themeViewModel: ThemeViewModel, usuario
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF272635)
+                    containerColor = MaterialTheme.colorScheme.primary
                 )
             )
         },
-        containerColor = Color(0xFFE8E9F3)
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -81,16 +83,18 @@ fun Speech(navController: NavController, themeViewModel: ThemeViewModel, usuario
             OutlinedTextField(
                 value = texto,
                 onValueChange = { texto = it },
-                label = { Text("Escribe algo para escuchar", fontSize = 16.sp) },
+                label = { Text("Escribe algo para escuchar", fontSize = 20.sp) },
                 modifier = Modifier.fillMaxWidth(),
-                textStyle = LocalTextStyle.current.copy(fontSize = 18.sp),
+                textStyle = LocalTextStyle.current.copy(fontSize = 20.sp),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFFCECECE),
-                    unfocusedContainerColor = Color(0xFFCECECE),
-                    focusedTextColor = Color(0xFF474652),
-                    unfocusedTextColor = Color(0xFF474652),
-                    focusedIndicatorColor = Color(0xFF272635),
-                    unfocusedIndicatorColor = Color(0xFF272635)
+                    focusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                    focusedTextColor = MaterialTheme.colorScheme.primary,
+                    unfocusedTextColor = MaterialTheme.colorScheme.primary,
+                    focusedIndicatorColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                 )
             )
 
@@ -110,11 +114,11 @@ fun Speech(navController: NavController, themeViewModel: ThemeViewModel, usuario
                     },
                     modifier = Modifier.weight(1f).height(56.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF474652),
-                        contentColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface
                     )
                 ) {
-                    Text("➕ Guardar", fontSize = 16.sp)
+                    Text("➕ Guardar", fontSize = 22.sp)
                 }
 
                 Button(
@@ -126,11 +130,11 @@ fun Speech(navController: NavController, themeViewModel: ThemeViewModel, usuario
                     },
                     modifier = Modifier.weight(1f).height(56.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF67666F), // destacado
-                        contentColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface
                     )
                 ) {
-                    Text("📋 Copiar", fontSize = 16.sp)
+                    Text("📋 Copiar", fontSize = 22.sp)
                 }
             }
 
@@ -147,20 +151,20 @@ fun Speech(navController: NavController, themeViewModel: ThemeViewModel, usuario
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF474652),
-                    contentColor = Color(0xFFCECECE)
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("🔊 Leer en voz alta", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Text("🔊 Leer en voz alta", fontWeight = FontWeight.Bold, fontSize = 22.sp)
             }
 
             Spacer(modifier = Modifier.height(32.dp))
 
             // Frases rápidas
-            Text("Frases rápidas", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Text("Frases rápidas", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, fontSize = 20.sp, color = MaterialTheme.colorScheme.onBackground)
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(28.dp))
 
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -177,31 +181,37 @@ fun Speech(navController: NavController, themeViewModel: ThemeViewModel, usuario
                             onClick = { tts?.speak(frase, TextToSpeech.QUEUE_FLUSH, null, null) },
                             modifier = Modifier.weight(1f).height(56.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF474652),
-                                contentColor = Color(0xFFCECECE)
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                contentColor = MaterialTheme.colorScheme.onSurface
                             ),
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text(frase, textAlign = TextAlign.Center, fontSize = 16.sp)
+                            Text(frase,
+                                textAlign = TextAlign.Center,
+                                maxLines = 2,
+                                overflow = TextOverflow.Clip,
+                                softWrap = true,
+                                fontSize = 20.sp
+                            )
                         }
 
-                        // Copiar
-                        Button(
-                            onClick = { clipboardManager.setText(AnnotatedString(frase)) },
-                            modifier = Modifier.size(56.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFA6A6A8), // destacado
-                                contentColor = Color.White
-                            ),
-                            contentPadding = PaddingValues(0.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text("📋", fontSize = 18.sp)
-                            }
-                        }
+//                        // Copiar
+//                        Button(
+//                            onClick = { clipboardManager.setText(AnnotatedString(frase)) },
+//                            modifier = Modifier.size(56.dp),
+//                            colors = ButtonDefaults.buttonColors(
+//                                containerColor = MaterialTheme.colorScheme.onSurface,
+//                                contentColor = MaterialTheme.colorScheme.onSurface
+//                            ),
+//                            contentPadding = PaddingValues(0.dp)
+//                        ) {
+//                            Box(
+//                                modifier = Modifier.fillMaxSize(),
+//                                contentAlignment = Alignment.Center
+//                            ) {
+//                                Text("📋", fontSize = 22.sp)
+//                            }
+//                        }
 
                         // Compartir
                         Button(
@@ -216,8 +226,8 @@ fun Speech(navController: NavController, themeViewModel: ThemeViewModel, usuario
                             },
                             modifier = Modifier.size(56.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFCECECE),
-                                contentColor = Color.White
+                                containerColor = MaterialTheme.colorScheme.onSurface,
+                                contentColor = MaterialTheme.colorScheme.onSurface
                             ),
                             contentPadding = PaddingValues(0.dp) // importante para eliminar padding interno
                         ) {
@@ -225,7 +235,7 @@ fun Speech(navController: NavController, themeViewModel: ThemeViewModel, usuario
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text("📤", fontSize = 18.sp)
+                                Text("📤", fontSize = 22.sp)
                             }
                         }
 
@@ -234,8 +244,8 @@ fun Speech(navController: NavController, themeViewModel: ThemeViewModel, usuario
                             onClick = { frases = frases - frase },
                             modifier = Modifier.size(56.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFFF7272),
-                                contentColor = Color.White
+                                containerColor = MaterialTheme.colorScheme.onSurface,
+                                contentColor = MaterialTheme.colorScheme.onSurface
                             ),
                             contentPadding = PaddingValues(0.dp) // elimina padding interno
                         ) {
@@ -243,7 +253,7 @@ fun Speech(navController: NavController, themeViewModel: ThemeViewModel, usuario
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text("❌", fontSize = 18.sp)
+                                Text("❌", fontSize = 22.sp)
                             }
                         }
                     }

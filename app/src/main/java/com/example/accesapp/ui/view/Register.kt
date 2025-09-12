@@ -5,11 +5,13 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -99,19 +101,19 @@ fun Register(navController: NavController, themeViewModel: ThemeViewModel, usuar
                     rut = it
                     rutError = !usuarioViewModel.esRutValido(it) // true si es inválido
                 },
-                label = { Text("Rut usuario (xxxxxxxx-x)") },
+                label = { Text("Rut usuario (xxxxxxxx-x)",fontSize = 20.sp) },
                 isError = rutError,
                 modifier = Modifier.fillMaxWidth(),
-
+                textStyle = TextStyle(fontSize = 20.sp),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFFCECECE),
-                    unfocusedContainerColor = Color(0xFFCECECE),
-                    focusedTextColor = Color(0xFF474652),
-                    unfocusedTextColor = Color(0xFF474652),
-                    focusedIndicatorColor = Color(0xFF272635),
-                    unfocusedIndicatorColor = Color(0xFF272635),
-                    focusedLabelColor = Color(0xFF272635),
-                    unfocusedLabelColor = Color(0xFF474652),
+                    focusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                    focusedTextColor = MaterialTheme.colorScheme.primary,
+                    unfocusedTextColor = MaterialTheme.colorScheme.primary,
+                    focusedIndicatorColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                 )
             )
 
@@ -139,23 +141,24 @@ fun Register(navController: NavController, themeViewModel: ThemeViewModel, usuar
                             "Contraseña" -> contrasena = newVal
                         }
                     },
-                    label = { Text(label, fontSize = 16.sp) },
+                    label = { Text(label, fontSize = 20.sp) },
                     modifier = Modifier.fillMaxWidth(),
+                    textStyle = TextStyle(fontSize = 20.sp),
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFFCECECE),
-                        unfocusedContainerColor = Color(0xFFCECECE),
-                        focusedTextColor = Color(0xFF474652),
-                        unfocusedTextColor = Color(0xFF474652),
-                        focusedIndicatorColor = Color(0xFF272635),
-                        unfocusedIndicatorColor = Color(0xFF272635),
-                        focusedLabelColor = Color(0xFF272635),
-                        unfocusedLabelColor = Color(0xFF474652),
+                        focusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                        focusedTextColor = MaterialTheme.colorScheme.primary,
+                        unfocusedTextColor = MaterialTheme.colorScheme.primary,
+                        focusedIndicatorColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                     ),
                     visualTransformation = if (label == "Contraseña" && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
                     trailingIcon = if (label == "Contraseña") {
                         {
                             TextButton(onClick = { passwordVisible = !passwordVisible }) {
-                                Text(if (passwordVisible) "Ocultar" else "Mostrar", color = Color(0xFF272635))
+                                Text(if (passwordVisible) "Ocultar" else "Mostrar", color = Color(0xFF272635), fontSize = 20.sp)
                             }
                         }
                     } else null
@@ -170,15 +173,15 @@ fun Register(navController: NavController, themeViewModel: ThemeViewModel, usuar
                         selected = genero == gen,
                         onClick = { genero = gen },
                         colors = RadioButtonDefaults.colors(
-                            selectedColor = Color(0xFF272635),
-                            unselectedColor = Color(0xFF272635)
+                            selectedColor = MaterialTheme.colorScheme.surface,
+                            unselectedColor = MaterialTheme.colorScheme.surface
                         )
                     )
                     Text(
                         gen,
-                        fontSize = 16.sp,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF474652),
+                        color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.padding(end = 16.dp)
                     )
                 }
@@ -192,16 +195,16 @@ fun Register(navController: NavController, themeViewModel: ThemeViewModel, usuar
                     checked = aceptoTerminos,
                     onCheckedChange = { aceptoTerminos = it },
                     colors = CheckboxDefaults.colors(
-                        checkedColor = Color(0xFF272635),
-                        uncheckedColor = Color(0xFF272635),
-                        checkmarkColor = Color(0xFFCECECE)
+                        checkedColor = MaterialTheme.colorScheme.surface,
+                        uncheckedColor = MaterialTheme.colorScheme.surface,
+                        checkmarkColor = MaterialTheme.colorScheme.onSurface
                     )
                 )
                 Text(
                     "Acepto términos y condiciones",
-                    fontSize = 16.sp,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF474652),
+                    color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.padding(start = 8.dp)
                 )
             }
@@ -238,12 +241,12 @@ fun Register(navController: NavController, themeViewModel: ThemeViewModel, usuar
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF474652),
-                    contentColor = Color(0xFFCECECE)
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Registrarse", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text("Registrarse", fontSize = 22.sp, fontWeight = FontWeight.Bold)
             }
         }
     }

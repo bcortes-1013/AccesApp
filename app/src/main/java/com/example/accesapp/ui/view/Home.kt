@@ -4,6 +4,7 @@ import android.R.attr.onClick
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -74,10 +75,16 @@ fun Home(navController: NavController, themeViewModel: ThemeViewModel) {
                         tint = MaterialTheme.colorScheme.onBackground
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Configuración", color = MaterialTheme.colorScheme.onBackground, fontSize = 18.sp)
+                    Text("Configuración", color = MaterialTheme.colorScheme.onBackground, fontSize = 20.sp)
                 }
                 TextButton(onClick = { navController.navigate(NavRouter.Login.route) }) {
-                    Text("Login", color = MaterialTheme.colorScheme.onBackground, fontSize = 18.sp)
+                    Icon(
+                        imageVector = Icons.Default.Login,
+                        contentDescription = "Login",
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Login", color = MaterialTheme.colorScheme.onBackground, fontSize = 20.sp)
                 }
             }
         }

@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -85,17 +86,18 @@ fun Recover(navController: NavController, themeViewModel: ThemeViewModel, usuari
             OutlinedTextField(
                 value = correo,
                 onValueChange = { correo = it },
-                label = { Text("Correo electrónico", fontSize = 16.sp) },
+                label = { Text("Correo electrónico", fontSize = 20.sp) },
                 modifier = Modifier.fillMaxWidth(),
+                textStyle = TextStyle(fontSize = 20.sp),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFFCECECE),
-                    unfocusedContainerColor = Color(0xFFCECECE),
-                    focusedTextColor = Color(0xFF474652),
-                    unfocusedTextColor = Color(0xFF474652),
-                    focusedIndicatorColor = Color(0xFF272635),
-                    unfocusedIndicatorColor = Color(0xFF272635),
-                    focusedLabelColor = Color(0xFF272635),
-                    unfocusedLabelColor = Color(0xFF474652),
+                    focusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.onSurface,
+                    focusedTextColor = MaterialTheme.colorScheme.primary,
+                    unfocusedTextColor = MaterialTheme.colorScheme.primary,
+                    focusedIndicatorColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
                 ),
                 singleLine = true
             )
@@ -119,12 +121,12 @@ fun Recover(navController: NavController, themeViewModel: ThemeViewModel, usuari
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF474652),
-                    contentColor = Color(0xFFCECECE)
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Recuperar contraseña", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text("Recuperar contraseña", fontSize = 22.sp, fontWeight = FontWeight.Bold)
             }
         }
     }

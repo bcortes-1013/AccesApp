@@ -113,7 +113,8 @@ fun Config(navController: NavController, themeViewModel: ThemeViewModel) {
                     Text(
                         text = label,
                         color = MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontSize = 20.sp
                     )
                 }
             }
