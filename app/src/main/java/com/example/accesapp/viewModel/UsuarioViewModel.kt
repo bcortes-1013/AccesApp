@@ -1,115 +1,20 @@
 package com.example.accesapp.viewModel
 
-
-import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
-import com.example.accesapp.model.Frase
+import com.example.accesapp.data.UsuarioRepository
 import com.example.accesapp.model.Usuario
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 
 class UsuarioViewModel: ViewModel() {
 
-    private val _usuarios = mutableStateListOf<Usuario>();
+    private val usuarios = mutableStateListOf<Usuario>()
 
-//    val usuarios: List<Usuario> get() = _usuarios
-
-    init {
-        // Usuario de prueba estático
-        _usuarios.add(
-            Usuario(
-                rut = "11111111-1",
-                nombreUsuario = "admin",
-                nombre = "Administrador",
-                apellidoP = "Prueba",
-                apellidoM = "Demo",
-                correo = "admin@demo.com",
-                contrasena = "1234",
-                genero = "masculino"
-            )
-        )
-        _usuarios.add(
-            Usuario(
-                rut = "12333444-5",
-                nombreUsuario = "camila_s",
-                nombre = "Camila",
-                apellidoP = "Serrano",
-                apellidoM = "Ortiz",
-                correo = "camila.serrano@example.com",
-                contrasena = "camila789",
-                genero = "femenino"
-            )
-        )
-        _usuarios.add(
-            Usuario(
-                rut = "13444555-6",
-                nombreUsuario = "santiago_r",
-                nombre = "Santiago",
-                apellidoP = "Rojas",
-                apellidoM = "Vargas",
-                correo = "santiago.rojas@example.com",
-                contrasena = "santi2025",
-                genero = "masculino"
-            )
-        )
-        _usuarios.add(
-            Usuario(
-                rut = "14555666-7",
-                nombreUsuario = "valentina_m",
-                nombre = "Valentina",
-                apellidoP = "Martínez",
-                apellidoM = "Fuentes",
-                correo = "valentina.martinez@example.com",
-                contrasena = "valen123",
-                genero = "femenino"
-            )
-        )
-        _usuarios.add(
-            Usuario(
-                rut = "15666777-8",
-                nombreUsuario = "diego_c",
-                nombre = "Diego",
-                apellidoP = "Castro",
-                apellidoM = "Luna",
-                correo = "diego.castro@example.com",
-                contrasena = "diego456",
-                genero = "masculino"
-            )
-        )
-        _usuarios.add(
-            Usuario(
-                rut = "16777888-9",
-                nombreUsuario = "josefina_p",
-                nombre = "Josefina",
-                apellidoP = "Paredes",
-                apellidoM = "Muñoz",
-                correo = "josefina.paredes@example.com",
-                contrasena = "jose2025",
-                genero = "femenino"
-            )
-        )
-    }
-
-    fun agregar(usuario: Usuario) {
-
-        if(_usuarios.any { it.rut.equals(usuario.rut, ignoreCase = true) }) return
-
-        _usuarios.add(usuario)
-
-    }
-
-    fun buscar(query: String): List<Usuario> {
-
-        if(query.isBlank()) return _usuarios
-
-        val q = query.trim().lowercase()
-
-        return _usuarios.filter {
-            it.rut.lowercase().contains(q) ||
-                    it.nombre.lowercase().contains(q) ||
-                    it.apellidoP.lowercase().contains(q) ||
-                    it.apellidoM.lowercase().contains(q)
-        }
-
+    suspend fun login(nombreUsuario: String, contrasena: String): Usuario? {
+        val usuario = UsuarioRepository.login(nombreUsuario, contrasena)
+        usuario?.let { if (!usuarios.contains(it)) usuarios.add(it) }
+        return usuario
     }
 
     fun agregarUsuario(
@@ -122,26 +27,28 @@ class UsuarioViewModel: ViewModel() {
         contrasena: String,
         genero: String
     ) {
-        val nuevo = Usuario(
-            rut,
-            nombreUsuario,
-            nombre,
-            apellidoP,
-            apellidoM,
-            correo,
-            contrasena,
-            genero,
-            frases = frasesPorDefecto().toMutableList()
+        val usuario = Usuario(
+            rut = rut,
+            nombreUsuario = nombreUsuario,
+            nombre = nombre,
+            apellidoP = apellidoP,
+            apellidoM = apellidoM,
+            correo = correo,
+            contrasena = contrasena,
+            genero = genero
         )
-        _usuarios.add(nuevo)
+        viewModelScope.launch {
+            UsuarioRepository.agregar(usuario)
+        }
     }
 
-    fun obtenerUsuarios(): List<Usuario> {
-        return _usuarios.toList()
+    suspend fun obtenerUsuarios() {
+        usuarios.clear()
+        usuarios.addAll(UsuarioRepository.obtenerUsuarios())
     }
 
-    fun validarLogin(nombreUsuario: String, contrasena: String): Usuario? =
-        _usuarios.find { it.nombreUsuario.equals(nombreUsuario, ignoreCase = true) && it.contrasena == contrasena
+    suspend fun recuperar(correo: String): String? {
+        return UsuarioRepository.recuperarContrasena(correo)
     }
 
     fun esRutValido(rut: String): Boolean {
@@ -171,13 +78,10 @@ class UsuarioViewModel: ViewModel() {
         }
     }
 
-    private fun frasesPorDefecto(): List<Frase> {
-        return listOf(
-            Frase(1, "¿Me puedes ayudar, por favor?"),
-            Frase(2, "¿Dónde está la parada de bus?"),
-            Frase(3, "Gracias por tu ayuda"),
-            Frase(4, "Necesito cruzar la calle"),
-            Frase(5, "¿Me puedes indicar qué número de bus viene?")
-        )
+    fun debugUsuarios() {
+        println("🔎 Lista de usuarios almacenados:")
+        usuarios.forEach {
+            println(" - ${it.nombreUsuario} (${it.correo})")
+        }
     }
 }

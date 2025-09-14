@@ -4,6 +4,9 @@ import android.speech.tts.TextToSpeech
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowLeft
+import androidx.compose.material.icons.filled.KeyboardDoubleArrowLeft
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,6 +22,7 @@ import androidx.navigation.NavController
 import com.example.accesapp.navigation.NavRouter
 import com.example.accesapp.viewModel.ThemeViewModel
 import com.example.accesapp.viewModel.UsuarioViewModel
+import kotlinx.coroutines.launch
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,8 +31,8 @@ fun Recover(navController: NavController, themeViewModel: ThemeViewModel, usuari
     val context = LocalContext.current
     var correo by remember { mutableStateOf("") }
     var mensaje by remember { mutableStateOf<String?>(null) }
-
     var tts: TextToSpeech? by remember { mutableStateOf(null) }
+    val scope = rememberCoroutineScope()
 
     // Inicializar TTS
     LaunchedEffect(Unit) {
@@ -66,7 +70,7 @@ fun Recover(navController: NavController, themeViewModel: ThemeViewModel, usuari
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
+                horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextButton(
@@ -74,8 +78,15 @@ fun Recover(navController: NavController, themeViewModel: ThemeViewModel, usuari
                         navController.navigate(NavRouter.Login.route) {
                             popUpTo(NavRouter.Recover.route) { inclusive = true }
                         }
+                        tts?.speak("Inicio de sesión", TextToSpeech.QUEUE_FLUSH, null, null)
                     }
                 ) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardDoubleArrowLeft,
+                        contentDescription = "Volver",
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text("Volver",
                         color = MaterialTheme.colorScheme.primary,
                         fontSize = 20.sp
@@ -102,20 +113,22 @@ fun Recover(navController: NavController, themeViewModel: ThemeViewModel, usuari
                 singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             Button(
                 onClick = {
-                    val usuario = usuarioViewModel.obtenerUsuarios()
-                        .find { it.correo.equals(correo.trim(), ignoreCase = true) }
+                    scope.launch {
+                        val contrasena = usuarioViewModel.recuperar(correo.trim())
 
-                    mensaje = if (usuario != null) {
-                        "Tu contraseña es: ${usuario.contrasena}"
-                    } else {
-                        "El correo ingresado no está registrado."
+                        val mensaje = if (contrasena != null) {
+                            "Tu contraseña es: $contrasena"
+                        } else {
+                            "El correo ingresado no está registrado."
+                        }
+
+                        Toast.makeText(context, mensaje, Toast.LENGTH_SHORT).show()
+                        tts?.speak(mensaje ?: "Ha ocurrido un error", TextToSpeech.QUEUE_FLUSH, null, null)
                     }
-                    Toast.makeText(context, mensaje, Toast.LENGTH_SHORT).show()
-                    tts?.speak(mensaje!!, TextToSpeech.QUEUE_FLUSH, null, null)
                 },
                 modifier = Modifier
                     .fillMaxWidth()

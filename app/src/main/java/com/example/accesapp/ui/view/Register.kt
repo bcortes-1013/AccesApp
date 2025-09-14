@@ -3,7 +3,12 @@ package com.example.accesapp.ui.view
 import android.speech.tts.TextToSpeech
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowLeft
+import androidx.compose.material.icons.filled.KeyboardDoubleArrowLeft
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
@@ -73,13 +78,14 @@ fun Register(navController: NavController, themeViewModel: ThemeViewModel, usuar
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
+                horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextButton(
@@ -87,10 +93,17 @@ fun Register(navController: NavController, themeViewModel: ThemeViewModel, usuar
                         navController.navigate(NavRouter.Login.route) {
                             popUpTo(NavRouter.Register.route) { inclusive = true }
                         }
+                        tts?.speak("Inicio de sesión", TextToSpeech.QUEUE_FLUSH, null, null)
                     }
                 ) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardDoubleArrowLeft,
+                        contentDescription = "Volver",
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text("Volver",
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontSize = 20.sp
                     )
                 }
@@ -158,7 +171,7 @@ fun Register(navController: NavController, themeViewModel: ThemeViewModel, usuar
                     trailingIcon = if (label == "Contraseña") {
                         {
                             TextButton(onClick = { passwordVisible = !passwordVisible }) {
-                                Text(if (passwordVisible) "Ocultar" else "Mostrar", color = Color(0xFF272635), fontSize = 20.sp)
+                                Text(if (passwordVisible) "Ocultar" else "Mostrar", color = MaterialTheme.colorScheme.onBackground, fontSize = 20.sp)
                             }
                         }
                     } else null
@@ -201,7 +214,7 @@ fun Register(navController: NavController, themeViewModel: ThemeViewModel, usuar
                     )
                 )
                 Text(
-                    "Acepto términos y condiciones",
+                    "Términos y condiciones",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground,

@@ -4,6 +4,11 @@ import android.speech.tts.TextToSpeech
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowLeft
+import androidx.compose.material.icons.filled.KeyboardDoubleArrowLeft
+import androidx.compose.material.icons.filled.Login
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,11 +28,13 @@ import com.example.accesapp.navigation.NavRouter
 import com.example.accesapp.viewModel.ThemeViewModel
 import com.example.accesapp.viewModel.UsuarioViewModel
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Login(navController: NavController, themeViewModel: ThemeViewModel, usuarioViewModel: UsuarioViewModel) {
 
+    var tts: TextToSpeech? by remember { mutableStateOf(null) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var nombreUsuario by remember { mutableStateOf("") }
@@ -35,12 +42,20 @@ fun Login(navController: NavController, themeViewModel: ThemeViewModel, usuarioV
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var passwordVisible by remember { mutableStateOf(false) }
 
+    LaunchedEffect(Unit) {
+        tts = TextToSpeech(context) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                tts?.language = Locale("es", "ES")
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        "Inicio",
+                        "Inicio de sesión",
                         color = MaterialTheme.colorScheme.onPrimary,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Bold,
@@ -62,7 +77,7 @@ fun Login(navController: NavController, themeViewModel: ThemeViewModel, usuarioV
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
+                horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextButton(
@@ -70,10 +85,17 @@ fun Login(navController: NavController, themeViewModel: ThemeViewModel, usuarioV
                         navController.navigate(NavRouter.Home.route) {
                             popUpTo(NavRouter.Config.route) { inclusive = true }
                         }
+                        tts?.speak("Inicio", TextToSpeech.QUEUE_FLUSH, null, null)
                     }
                 ) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardDoubleArrowLeft,
+                        contentDescription = "Volver",
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text("Volver",
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontSize = 20.sp
                     )
                 }
@@ -126,21 +148,28 @@ fun Login(navController: NavController, themeViewModel: ThemeViewModel, usuarioV
                 singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             Button(
                 onClick = {
-                    val usuario = usuarioViewModel.validarLogin(nombreUsuario, contrasena)
-                    if (usuario != null) {
-                        scope.launch {
+                    scope.launch {
+                        usuarioViewModel.debugUsuarios()
+                        val usuario = usuarioViewModel.login(nombreUsuario, contrasena)
+                        if (usuario != null) {
+                            // Guardar sesión local
                             SesionManager.guardarUsuarioActivo(context, usuario.nombreUsuario)
+
+                            val mensaje = "Inicio exitoso"
+                            Toast.makeText(context, mensaje, Toast.LENGTH_SHORT).show()
+                            tts?.speak(mensaje, TextToSpeech.QUEUE_FLUSH, null, null)
+
+                            navController.navigate("tools")
+                        } else {
+                            val mensaje = "Correo o contraseña incorrectos"
+                            Toast.makeText(context, mensaje, Toast.LENGTH_SHORT).show()
+                            tts?.speak(mensaje, TextToSpeech.QUEUE_FLUSH, null, null)
                         }
-                        errorMessage = "Inicio exitoso"
-                        navController.navigate("speech")
-                    } else {
-                        errorMessage = "Correo o contraseña incorrectos"
                     }
-                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -160,10 +189,16 @@ fun Login(navController: NavController, themeViewModel: ThemeViewModel, usuarioV
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                TextButton(onClick = { navController.navigate(NavRouter.Register.route) }) {
+                TextButton(onClick = {
+                    navController.navigate(NavRouter.Register.route)
+                    tts?.speak("Registro", TextToSpeech.QUEUE_FLUSH, null, null)
+                }) {
                     Text("Registrarse", color = MaterialTheme.colorScheme.onBackground, fontSize = 20.sp)
                 }
-                TextButton(onClick = { navController.navigate(NavRouter.Recover.route) }) {
+                TextButton(onClick = {
+                    navController.navigate(NavRouter.Recover.route)
+                    tts?.speak("Recuperar contraseña", TextToSpeech.QUEUE_FLUSH, null, null)
+                }) {
                     Text("Recuperar contraseña", color = MaterialTheme.colorScheme.onBackground, fontSize = 20.sp)
                 }
             }

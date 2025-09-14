@@ -12,9 +12,9 @@ val surfaceLight = Color(0xFF8F6A2F)
 val onSurfaceLight = Color(0xFFFFEEE5)
 
 // Tema OSCURO (fondo oscuro, texto claro)
-val primaryDark = Color(0xFFBB86FC)
-val onPrimaryDark = Color.Black
-val backgroundDark = Color(0xFF121212)
-val onBackgroundDark = Color.White
-val surfaceDark = Color(0xFF1E1E1E)
-val onSurfaceDark = Color.White
+val primaryDark = Color(0xFF1A1A1A)
+val onPrimaryDark = Color(0xFF9A9A9A)
+val backgroundDark = Color(0xFF777777)
+val onBackgroundDark = Color(0xFF1E1E1E)
+val surfaceDark = Color(0xFF575757)
+val onSurfaceDark = Color(0xFFBEBEBE)

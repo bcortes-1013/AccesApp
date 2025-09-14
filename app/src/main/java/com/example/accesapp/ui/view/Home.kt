@@ -1,10 +1,14 @@
 package com.example.accesapp.ui.view
 
 import android.R.attr.onClick
+import android.speech.tts.TextToSpeech
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Login
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,7 +24,10 @@ import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
 import com.example.accesapp.navigation.NavRouter
 import com.example.accesapp.R
+import com.example.accesapp.data.SesionManager
 import com.example.accesapp.viewModel.ThemeViewModel
+import kotlinx.coroutines.launch
+import java.util.Locale
 
 @Composable
 fun AnimacionLottie() {
@@ -40,13 +47,24 @@ fun AnimacionLottie() {
 @Composable
 fun Home(navController: NavController, themeViewModel: ThemeViewModel) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var tts: TextToSpeech? by remember { mutableStateOf(null) }
+    val usuarioActivo by SesionManager.obtenerUsuarioActivo(context).collectAsState(initial = null)
+
+    LaunchedEffect(Unit) {
+        tts = TextToSpeech(context) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                tts?.language = Locale("es", "ES")
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        "AccesAPP",
+                        "Inicio",
                         color = MaterialTheme.colorScheme.onPrimary,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Bold,
@@ -66,28 +84,41 @@ fun Home(navController: NavController, themeViewModel: ThemeViewModel) {
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                TextButton(onClick = { navController.navigate(NavRouter.Config.route) }) {
+                TextButton(onClick = {
+                    navController.navigate(NavRouter.Config.route)
+                    tts?.speak("Ajustes", TextToSpeech.QUEUE_FLUSH, null, null)
+                }) {
                     Icon(
                         imageVector = Icons.Default.Settings,
-                        contentDescription = "Configuración",
+                        contentDescription = "Ajustes",
                         tint = MaterialTheme.colorScheme.onBackground
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Configuración", color = MaterialTheme.colorScheme.onBackground, fontSize = 20.sp)
+                    Text("Ajustes", color = MaterialTheme.colorScheme.onBackground, fontSize = 20.sp)
                 }
-                TextButton(onClick = { navController.navigate(NavRouter.Login.route) }) {
+                TextButton(onClick = {
+                    if (usuarioActivo != null) {
+                        scope.launch {
+                            SesionManager.cerrarSesion(context)
+                        }
+                    } else {
+                        navController.navigate(NavRouter.Login.route)
+                    }
+                    tts?.speak(if (usuarioActivo != null) "Cerrando sesión" else "Inicio de sesión", TextToSpeech.QUEUE_FLUSH, null, null)
+                }) {
                     Icon(
-                        imageVector = Icons.Default.Login,
-                        contentDescription = "Login",
+                        imageVector = if (usuarioActivo != null) Icons.Default.Logout else Icons.Default.Login,
+                        contentDescription = if (usuarioActivo != null) "Cerrar sesión" else "Iniciar sesión",
                         tint = MaterialTheme.colorScheme.onBackground
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Login", color = MaterialTheme.colorScheme.onBackground, fontSize = 20.sp)
+                    Text(if (usuarioActivo != null) "Cerrar sesión" else "Iniciar sesión", color = MaterialTheme.colorScheme.onBackground, fontSize = 20.sp)
                 }
             }
         }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -96,12 +127,20 @@ fun Home(navController: NavController, themeViewModel: ThemeViewModel) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Text(
+                text = "Bienvenido ${usuarioActivo ?: "Invitado"}",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             AnimacionLottie()
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                "Bienvenido a AccesAPP",
+                "AccesAPP",
                 fontSize = 32.sp,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold,
@@ -121,7 +160,16 @@ fun Home(navController: NavController, themeViewModel: ThemeViewModel) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = {navController.navigate("register") },
+                onClick = {
+                    if (usuarioActivo != null) {
+                        navController.navigate("tools") {
+                            popUpTo("login") { inclusive = true }
+                        }
+                    } else {
+                        navController.navigate(NavRouter.Register.route)
+                    }
+                    tts?.speak(if (usuarioActivo != null) "Yendo a herramientas" else "Yendo al registro", TextToSpeech.QUEUE_FLUSH, null, null)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -131,7 +179,7 @@ fun Home(navController: NavController, themeViewModel: ThemeViewModel) {
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("¡Regístrate!", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                Text(if (usuarioActivo != null ) "Ir a herramientas" else "¡Regístrate!", fontSize = 22.sp, fontWeight = FontWeight.Bold)
             }
         }
     }
