@@ -1,6 +1,6 @@
 package com.example.accesapp.model
 
-data class Usuario (
+data class User (
     val rut: String,
     val nombreUsuario: String,
     val nombre: String,

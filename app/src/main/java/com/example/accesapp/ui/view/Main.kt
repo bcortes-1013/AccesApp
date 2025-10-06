@@ -8,7 +8,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
-import com.example.accesapp.navigation.AppNav
 import com.example.accesapp.navigation.NavRouter
 import com.example.accesapp.viewModel.ThemeViewModel
 import kotlinx.coroutines.launch

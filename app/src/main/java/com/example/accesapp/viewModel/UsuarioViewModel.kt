@@ -3,17 +3,17 @@ package com.example.accesapp.viewModel
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import com.example.accesapp.data.UsuarioRepository
-import com.example.accesapp.model.Usuario
+import com.example.accesapp.model.User
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
 class UsuarioViewModel: ViewModel() {
 
-    private val usuarios = mutableStateListOf<Usuario>()
+    private val users = mutableStateListOf<User>()
 
-    suspend fun login(nombreUsuario: String, contrasena: String): Usuario? {
+    suspend fun login(nombreUsuario: String, contrasena: String): User? {
         val usuario = UsuarioRepository.login(nombreUsuario, contrasena)
-        usuario?.let { if (!usuarios.contains(it)) usuarios.add(it) }
+        usuario?.let { if (!users.contains(it)) users.add(it) }
         return usuario
     }
 
@@ -27,7 +27,7 @@ class UsuarioViewModel: ViewModel() {
         contrasena: String,
         genero: String
     ) {
-        val usuario = Usuario(
+        val user = User(
             rut = rut,
             nombreUsuario = nombreUsuario,
             nombre = nombre,
@@ -38,13 +38,13 @@ class UsuarioViewModel: ViewModel() {
             genero = genero
         )
         viewModelScope.launch {
-            UsuarioRepository.agregar(usuario)
+            UsuarioRepository.agregar(user)
         }
     }
 
     suspend fun obtenerUsuarios() {
-        usuarios.clear()
-        usuarios.addAll(UsuarioRepository.obtenerUsuarios())
+        users.clear()
+        users.addAll(UsuarioRepository.obtenerUsuarios())
     }
 
     suspend fun recuperar(correo: String): String? {
@@ -80,7 +80,7 @@ class UsuarioViewModel: ViewModel() {
 
     fun debugUsuarios() {
         println("🔎 Lista de usuarios almacenados:")
-        usuarios.forEach {
+        users.forEach {
             println(" - ${it.nombreUsuario} (${it.correo})")
         }
     }

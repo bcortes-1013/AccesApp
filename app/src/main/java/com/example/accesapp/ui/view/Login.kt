@@ -5,15 +5,11 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowLeft
 import androidx.compose.material.icons.filled.KeyboardDoubleArrowLeft
-import androidx.compose.material.icons.filled.Login
-import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -29,6 +25,7 @@ import com.example.accesapp.viewModel.ThemeViewModel
 import com.example.accesapp.viewModel.UsuarioViewModel
 import kotlinx.coroutines.launch
 import java.util.Locale
+import com.example.accesapp.utils.Network
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -152,6 +149,7 @@ fun Login(navController: NavController, themeViewModel: ThemeViewModel, usuarioV
 
             Button(
                 onClick = {
+                    if (!Network.requireInternet(context)) return@Button
                     scope.launch {
                         usuarioViewModel.debugUsuarios()
                         val usuario = usuarioViewModel.login(nombreUsuario, contrasena)

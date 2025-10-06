@@ -17,14 +17,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import android.net.Uri
+import android.os.Bundle
+import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowLeft
 import androidx.compose.material.icons.filled.KeyboardDoubleArrowLeft
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
 import androidx.navigation.NavController
 import com.example.accesapp.navigation.NavRouter
 import com.example.accesapp.viewModel.ThemeViewModel
@@ -36,6 +39,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.core.content.ContextCompat
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,6 +67,81 @@ fun Tools(
         }
     }
 
+
+
+
+
+    val speechRecognizer = remember { SpeechRecognizer.createSpeechRecognizer(context) }
+
+    var speechText by remember { mutableStateOf("") }
+
+    val recognizerIntent = remember {
+        Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-ES")
+        }
+    }
+
+    val permissionToRecordAudio = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+
+        ) { isGranted ->
+        if (isGranted) {
+            speechRecognizer.startListening(recognizerIntent)
+        }
+        else{
+            Toast.makeText(context, "Permiso denegado para el microfono", Toast.LENGTH_SHORT).show()
+        }
+
+    }
+
+    val recognizerListener = object : RecognitionListener{
+        override fun onBeginningOfSpeech() {
+            Toast.makeText(context, "Escuchando voz", Toast.LENGTH_SHORT).show()
+        }
+
+        override fun onBufferReceived(p0: ByteArray?) {
+            Toast.makeText(context, "Buffer recibido", Toast.LENGTH_SHORT).show()
+        }
+
+        override fun onEndOfSpeech() {
+            Toast.makeText(context, "Procesando voz", Toast.LENGTH_SHORT).show()
+        }
+
+        override fun onError(p0: Int) {
+            Toast.makeText(context, "Error al reconocer la voz", Toast.LENGTH_SHORT).show()
+        }
+
+        override fun onEvent(p0: Int, p1: Bundle?) {
+            Toast.makeText(context, "Evento recibido", Toast.LENGTH_SHORT).show()
+        }
+
+        override fun onPartialResults(p0: Bundle?) {
+            Toast.makeText(context, "Resultado parcial recibido", Toast.LENGTH_SHORT).show()
+        }
+
+        override fun onReadyForSpeech(p0: Bundle?) {
+            Toast.makeText(context, "Listo para recibir voz", Toast.LENGTH_SHORT).show()
+        }
+
+        override fun onResults(p0: Bundle?) {
+            val matches = p0?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+            texto = matches?.firstOrNull() ?: ""
+        }
+
+        override fun onRmsChanged(p0: Float) {
+            Toast.makeText(context, "Nivel de ruido detectado", Toast.LENGTH_SHORT).show()
+        }
+
+    }
+
+    speechRecognizer.setRecognitionListener(recognizerListener)
+
+
+
+
+
+
     // Inicializar TTS
     LaunchedEffect(Unit) {
         tts = TextToSpeech(context) { status ->
@@ -78,7 +158,8 @@ fun Tools(
                     Text(
                         "Acceso rápido",
                         color = MaterialTheme.colorScheme.onPrimary,
-                        fontSize = 22.sp,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.Bold,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 },
@@ -125,36 +206,7 @@ fun Tools(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 🚨 Emergencia
-            Button(
-                onClick = {
-                    try {
-                        // Forma segura de crear Uri
-                        val intent = Intent(Intent.ACTION_DIAL)
-                        intent.data = Uri.parse("tel:$emergenciaNumero")
-                        // Verificar si hay actividad que pueda manejar el intent
-                        if (intent.resolveActivity(context.packageManager) != null) {
-                            context.startActivity(intent)
-                        } else {
-                            Toast.makeText(context, "No se puede abrir el marcador", Toast.LENGTH_SHORT).show()
-                        }
-                    } catch (e: Exception) {
-                        Toast.makeText(context, "Error al intentar llamar", Toast.LENGTH_SHORT).show()
-                    }
-                },
-                modifier = Modifier.fillMaxWidth().height(80.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error,
-                    contentColor = MaterialTheme.colorScheme.onError
-                ),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text("📞 Llamar a emergencia", fontSize = 22.sp)
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Campo de texto grande
+            // Campo de texto grande sincronizado
             OutlinedTextField(
                 value = texto,
                 onValueChange = { texto = it },
@@ -176,49 +228,77 @@ fun Tools(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Botones agrupados horizontalmente
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            Button(
+                onClick = {
+                    if (texto.isNotBlank()) {
+                        tts?.speak(texto, TextToSpeech.QUEUE_FLUSH, null, null)
+                    } else {
+                        tts?.speak("Por favor escribe un texto primero", TextToSpeech.QUEUE_FLUSH, null, null)
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(16.dp)
             ) {
-                // Botón para leer en voz alta
-                Button(
-                    onClick = {
-                        if (texto.isNotBlank()) {
-                            tts?.speak(texto, TextToSpeech.QUEUE_FLUSH, null, null)
-                        } else {
-                            tts?.speak("Por favor escribe un texto primero", TextToSpeech.QUEUE_FLUSH, null, null)
-                        }
-                    },
-                    modifier = Modifier.weight(1f).height(80.dp),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text("Leer", fontSize = 22.sp)
-                }
-
-                // Botón para compartir
-                Button(
-                    onClick = {
-                        if (texto.isNotBlank()) {
-                            val sendIntent = Intent().apply {
-                                action = Intent.ACTION_SEND
-                                putExtra(Intent.EXTRA_TEXT, texto)
-                                type = "text/plain"
-                            }
-                            val shareIntent = Intent.createChooser(sendIntent, null)
-                            context.startActivity(shareIntent)
-                        } else {
-                            tts?.speak("Por favor escribe un texto primero", TextToSpeech.QUEUE_FLUSH, null, null)
-                        }
-                    },
-                    modifier = Modifier.weight(1f).height(80.dp),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text("Compartir", fontSize = 22.sp)
-                }
+                Text("📖 Leer", fontSize = 22.sp)
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = {
+                    permissionToRecordAudio.launch(Manifest.permission.RECORD_AUDIO)
+                    // Cuando se complete el reconocimiento, speechText tendrá el resultado.
+                    // Lo sincronizamos con el texto del campo:
+                    texto = speechText
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text(
+                    text = "🗣️ Ingresar texto por voz",
+                    fontSize = 22.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = {
+                    if (texto.isNotBlank()) {
+                        val sendIntent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(Intent.EXTRA_TEXT, texto)
+                            type = "text/plain"
+                        }
+                        val shareIntent = Intent.createChooser(sendIntent, null)
+                        context.startActivity(shareIntent)
+                    } else {
+                        tts?.speak("Por favor escribe un texto primero", TextToSpeech.QUEUE_FLUSH, null, null)
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text("📤 Compartir", fontSize = 22.sp)
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Text(
+                "Otras herramientas",
+                fontSize = 24.sp,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
 
             // 📍 Compartir ubicación
             Button(
@@ -247,7 +327,7 @@ fun Tools(
                                     putExtra(Intent.EXTRA_TEXT, mensaje)
                                     type = "text/plain"
                                 }
-                                val shareIntent = Intent.createChooser(sendIntent, "Compartir ubicación")
+                                val shareIntent = Intent.createChooser(sendIntent, "Enviar ubicación")
                                 context.startActivity(shareIntent)
                             } else {
                                 Toast.makeText(context, "No se pudo obtener la ubicación", Toast.LENGTH_SHORT).show()
@@ -297,6 +377,10 @@ fun Tools(
                     fontSize = 22.sp
                 )
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+
         }
     }
 }
